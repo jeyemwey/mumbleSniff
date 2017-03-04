@@ -1,0 +1,17 @@
+{
+  "name": "mumblesniff",
+  "version": "1.0.0",
+  "description": "Sniffing a mumble server for new users.",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository":  {
+    "type": "git",
+    "url": "git://github.com/jeyemwey/mumbleSniff.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
