@@ -102,14 +102,14 @@ function getUsersFromChannel(channel) {
 }
 
 console.log('MUMBL: Connecting');
-mumble.connect('mumble://paulsurrey.de', options, function(error, connection) {
+mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, connection) {
 	if (error) {
 		throw new Error(error);
 	}
 
 	console.log('MUMBL: Connected');
 
-	connection.authenticate('mumbleBot');
+	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
 		var alt = getUsersFromChannel(connection.rootChannel);
 
@@ -142,10 +142,12 @@ bot.on('text', function(msg) {
   if(msg.text == '/start') {
   	//Neuer Nutzer, abspeichern
   	botUsers.push(fromId);
+  	console.log("TELEG: " + firstName + " has subscribed.");
   	bot.sendMessage(fromId, "Welcome, " + firstName + "! You are now on the list and will be notified when somebody comes online. You can stop the service with /stop.");
   } else if(msg.text == '/stop') {
   	//Benutzer abbestellen.
   	arr_remove(botUsers, fromId);
+  	console.log("TELEG: " + firstName + " has quit its subscription.");
   	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
   }
 });
