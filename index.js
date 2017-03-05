@@ -1,4 +1,10 @@
-var mumble = require('mumble'), fs = require('fs');
+"use strict";
+
+const
+	dotenv = require('dotenv').config(),
+	fs = require('fs'),
+	mumble = require('mumble'),
+	TeleBot = require('telebot');
 
 var options = {
 	key: fs.readFileSync('key.pem'),
@@ -28,9 +34,18 @@ function arr_diff(a1, a2) {
 
 	return diff;
 }
+function arr_remove(array, item) {
+	let index = array.indexOf(item);
+ 
+  if (index > -1) {
+     array.splice(index, 1);
+  }
 
-// https://tc39.github.io/ecma262/#sec-array.prototype.includes
+  return array;
+}
+
 if (!Array.prototype.includes) {
+	// https://tc39.github.io/ecma262/#sec-array.prototype.includes
   Object.defineProperty(Array.prototype, 'includes', {
     value: function(searchElement, fromIndex) {
 
@@ -86,13 +101,13 @@ function getUsersFromChannel(channel) {
 	return users;
 }
 
-console.log('Connecting');
+console.log('MUMBL: Connecting');
 mumble.connect('mumble://paulsurrey.de', options, function(error, connection) {
 	if (error) {
 		throw new Error(error);
 	}
 
-	console.log('Connected');
+	console.log('MUMBL: Connected');
 
 	connection.authenticate('mumbleBot');
 	connection.on('ready', function() {
@@ -100,8 +115,7 @@ mumble.connect('mumble://paulsurrey.de', options, function(error, connection) {
 
 		setInterval(function() {
 			var neu = getUsersFromChannel(connection.rootChannel);
-			console.log(neu);
-
+			
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
@@ -116,7 +130,30 @@ mumble.connect('mumble://paulsurrey.de', options, function(error, connection) {
 	});
 });
 
+var botUsers = [];
+const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
+bot.connect();
+bot.on('connect', function() {console.log("TELEG: Bot is connected.")});
+bot.on('reconnected', function() {console.log("TELEG: Bot is reconnected.")});
+bot.on('text', function(msg) {
+  let fromId = msg.from.id;
+  let firstName = msg.from.first_name;
+
+  if(msg.text == '/start') {
+  	//Neuer Nutzer, abspeichern
+  	botUsers.push(fromId);
+  	bot.sendMessage(fromId, "Welcome, " + firstName + "! You are now on the list and will be notified when somebody comes online. You can stop the service with /stop.");
+  } else if(msg.text == '/stop') {
+  	//Benutzer abbestellen.
+  	arr_remove(botUsers, fromId);
+  	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
+  }
+});
 
 function sendTelegramMessage(string) {
 	console.log("TELEG: " + string);
+
+	botUsers.forEach(function(botUser) {
+		return bot.sendMessage(botUser, string);
+	});
 }

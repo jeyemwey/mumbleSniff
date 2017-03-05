@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "Sniffing a mumble server for new users.",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "mumble": "0.3.11",
+    "telebot": "1.0.7"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository":  {
+  "repository": {
     "type": "git",
     "url": "git://github.com/jeyemwey/mumbleSniff.git"
   },
