@@ -115,7 +115,6 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 		setInterval(function() {
 			var neu = getUsersFromChannel(connection.rootChannel);
-			
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
@@ -150,6 +149,8 @@ bot.on('text', function(msg) {
   	console.log("TELEG: " + firstName + " has quit its subscription.");
   	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
   }
+
+  fs.writeFileSync("loggedInUsers.log", botUsers.join("\n") + "");
 });
 
 function sendTelegramMessage(string) {

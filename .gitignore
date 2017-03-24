@@ -1,4 +1,8 @@
+#Node Stuff
 node_modules/
 *.pem
 build/
+
+# Application Data
 .env
+loggedInUsers.log
