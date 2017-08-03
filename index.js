@@ -101,6 +101,8 @@ function getUsersFromChannel(channel) {
 	return users;
 }
 
+var rootCh;
+
 console.log('MUMBL: Connecting');
 mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, connection) {
 	if (error) {
@@ -111,10 +113,12 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
-		var alt = getUsersFromChannel(connection.rootChannel);
+		rootCh = connection.rootChannel;
+
+		var alt = getUsersFromChannel(rootCh);
 
 		setInterval(function() {
-			var neu = getUsersFromChannel(connection.rootChannel);
+			var neu = getUsersFromChannel(rootCh);
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
@@ -152,6 +156,8 @@ bot.on('text', function(msg) {
   	arr_remove(botUsers, fromId);
   	console.log("TELEG: " + firstName + " has quit its subscription.");
   	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
+  } else {
+	rootCh.sendMessage(firstName + ": " + msg.text);
   }
 
   fs.writeFileSync("loggedInUsers.log", botUsers.join("\n") + "");
