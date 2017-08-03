@@ -140,9 +140,13 @@ bot.on('text', function(msg) {
 
   if(msg.text == '/start') {
   	//Neuer Nutzer, abspeichern
-  	botUsers.push(fromId);
-  	console.log("TELEG: " + firstName + " has subscribed.");
-  	bot.sendMessage(fromId, "Welcome, " + firstName + "! You are now on the list and will be notified when somebody comes online. You can stop the service with /stop.");
+  	if(botUsers.includes(fromId)) {
+		bot.sendMessage(fromId, "You have already subscribed. You can quit the subscription with /stop.");
+	} else {
+		botUsers.push(fromId);
+  		console.log("TELEG: " + firstName + " has subscribed.");
+  		bot.sendMessage(fromId, "Welcome, " + firstName + "! You are now on the list and will be notified when somebody comes online. You can stop the service with /stop.");
+ 	}
   } else if(msg.text == '/stop') {
   	//Benutzer abbestellen.
   	arr_remove(botUsers, fromId);
