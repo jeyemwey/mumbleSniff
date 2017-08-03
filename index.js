@@ -93,6 +93,11 @@ if (!Array.prototype.includes) {
   });
 }
 
+function nl2br (str, is_xhtml) {
+    var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
+    return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
+}
+
 function getUsersFromChannel(channel) {
 	var users = [];
 	for (var u in channel.users) {
@@ -131,6 +136,9 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 			alt = neu;
 		}, 1000);
 	});
+	connection.on('message', function(text, user, scope) {
+		sendTelegramMessage(user.name + ":\n" + text);
+	});
 });
 
 var botUsers = [];
@@ -157,16 +165,20 @@ bot.on('text', function(msg) {
   	console.log("TELEG: " + firstName + " has quit its subscription.");
   	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
   } else {
-	rootCh.sendMessage(firstName + ": " + msg.text);
+	var message = firstName + ":\n" + msg.text;
+	rootCh.sendMessage(nl2br(message));
+	sendTelegramMessage(message, fromId);
   }
 
   fs.writeFileSync("loggedInUsers.log", botUsers.join("\n") + "");
 });
 
-function sendTelegramMessage(string) {
+function sendTelegramMessage(string, except) {
 	console.log("TELEG: " + string);
 
 	botUsers.forEach(function(botUser) {
-		return bot.sendMessage(botUser, string);
+		if(botUser !== except)
+			return bot.sendMessage(botUser, string);
+		else return 0;
 	});
 }
