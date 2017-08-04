@@ -106,7 +106,7 @@ function getUsersFromChannel(channel) {
 	return users;
 }
 
-var rootCh;
+var rootCh, alt;
 
 console.log('MUMBL: Connecting');
 mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, connection) {
@@ -120,7 +120,7 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 	connection.on('ready', function() {
 		rootCh = connection.rootChannel;
 
-		var alt = getUsersFromChannel(rootCh);
+		alt = getUsersFromChannel(rootCh);
 
 		setInterval(function() {
 			var neu = getUsersFromChannel(rootCh);
@@ -142,6 +142,7 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 });
 
 var botUsers = [];
+var idToName = {};
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
 bot.on('connect', function() {console.log("TELEG: Bot is connected.")});
@@ -149,6 +150,8 @@ bot.on('reconnected', function() {console.log("TELEG: Bot is reconnected.")});
 bot.on('text', function(msg) {
   let fromId = msg.from.id;
   let firstName = msg.from.first_name;
+
+  idToName[fromId] = firstName;
 
   if(msg.text == '/start') {
   	//Neuer Nutzer, abspeichern
@@ -164,6 +167,10 @@ bot.on('text', function(msg) {
   	arr_remove(botUsers, fromId);
   	console.log("TELEG: " + firstName + " has quit its subscription.");
   	bot.sendMessage(fromId, firstName + ", you have now unsubscribed. You can start the service again with /start.");
+  } else if(msg.text == '/list') {
+	var firsts = botUsers.map(function(i) {return idToName[i];});
+	var message = "Online bei Mumble: " + alt.join(", ") + "\n\nOnline bei Telegram: " + firsts.join(", ");
+  	bot.sendMessage(fromId, message);
   } else {
 	var message = firstName + ":\n" + msg.text;
 	rootCh.sendMessage(nl2br(message));
