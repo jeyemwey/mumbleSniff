@@ -100,14 +100,18 @@ function nl2br (str, is_xhtml) {
 }
 
 function getUsersFromChannel(connection, channels) {
-	console.log(channels);
 	var users = [];
 	for(let i = 0; i <= channels; i++) {
-		console.log(i);
 		try
 		{
 			for (var u in connection._channels[i].users) {
-				users.push(connection._channels[i].users[u].name + "");
+				let username = connection._channels[i].users[u].name + "";
+				if(username==botusername)
+				{}
+				else
+				{
+					users.push(connection._channels[i].users[u].name + "");
+				}
 			}
 		}
 		catch(e)
@@ -138,7 +142,6 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
-		rootCh = connection._channels[2];
 		alt = getUsersFromChannel(connection, ObjectLength(connection._channels));
 
 		setInterval(function() {
@@ -146,9 +149,9 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
-					sendTelegramMessage(u + " has left the server.");
+					sendTelegramMessage(u + " has left the server. \n\nCurrently active Users: " + neu.length + " \n\n" + neu.join(", "));
 				} else if(neu.includes(u)) { //User ist in neu und nicht in alt
-					sendTelegramMessage(u + " has joined the server.");
+					sendTelegramMessage(u + " has joined the server.\n\nCurrently active Users: " + neu.length + " \n\n" + neu.join(", "));
 				}
 			});
 
@@ -163,6 +166,7 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 var botUsers = [-1001354373323];
 var idToName = {};
+var botusername = process.env.MUMBLEUSER;
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
 bot.on('connect', function() {console.log("TELEG: Bot is connected.")});
