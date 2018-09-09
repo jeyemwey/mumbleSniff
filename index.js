@@ -4,7 +4,8 @@ const
 	dotenv = require('dotenv').config(),
 	fs = require('fs'),
 	mumble = require('mumble'),
-	TeleBot = require('telebot');
+	TeleBot = require('telebot'),
+	util = require('util');
 
 var options = {
 	key: fs.readFileSync('key.pem'),
@@ -98,13 +99,32 @@ function nl2br (str, is_xhtml) {
     return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
 
-function getUsersFromChannel(channel) {
+function getUsersFromChannel(connection, channels) {
+	console.log(channels);
 	var users = [];
-	for (var u in channel.users) {
-		users.push(channel.users[u].name + "");
+	for(let i = 0; i <= channels; i++) {
+		console.log(i);
+		try
+		{
+			for (var u in connection._channels[i].users) {
+				users.push(connection._channels[i].users[u].name + "");
+			}
+		}
+		catch(e)
+		{}
 	}
 	return users;
 }
+
+function ObjectLength( object ) {
+    var length = 0;
+    for( var key in object ) {
+        if( object.hasOwnProperty(key) ) {
+            ++length;
+        }
+    }
+    return length;
+};
 
 var rootCh, alt;
 
@@ -118,12 +138,11 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
-		rootCh = connection.rootChannel;
-
-		alt = getUsersFromChannel(rootCh);
+		rootCh = connection._channels[2];
+		alt = getUsersFromChannel(connection, ObjectLength(connection._channels));
 
 		setInterval(function() {
-			var neu = getUsersFromChannel(rootCh);
+			var neu = getUsersFromChannel(connection, ObjectLength(connection._channels));
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
@@ -141,7 +160,8 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 	});
 });
 
-var botUsers = [];
+
+var botUsers = [-1001354373323];
 var idToName = {};
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
