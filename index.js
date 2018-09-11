@@ -98,10 +98,27 @@ function nl2br (str, is_xhtml) {
     return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
 
-function getUsersFromChannel(channel) {
+function objectLength(object) {
+	var length = 0;
+	for (var key in object) {
+		if (object.hasOwnProperty(key)) {
+			++length;
+		}
+	}
+	return length;
+};
+
+function getUsersFromChannel(connection, channels) {
 	var users = [];
-	for (var u in channel.users) {
-		users.push(channel.users[u].name + "");
+	for(let i = 0; i <= channels; i++) { // For every channel
+		try	{
+			for (var u in connection._channels[i].users) { // For every user in a channel
+				let username = connection._channels[i].users[u].name + "";
+				if (username !== process.env.MUMBLEUSER) {
+					users.push(username);
+				}
+			}
+		} catch(e) { /* Do nothing */ }
 	}
 	return users;
 }
@@ -119,17 +136,16 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
 		rootCh = connection.rootChannel;
-
-		alt = getUsersFromChannel(rootCh);
+		alt = getUsersFromChannel(connection, objectLength(connection._channels));
 
 		setInterval(function() {
-			var neu = getUsersFromChannel(rootCh);
+			var neu = getUsersFromChannel(connection, objectLength(connection._channels));
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
-					sendTelegramMessage(u + " has left the server.");
+					sendTelegramMessage(u + " has left the server. \n\nCurrently active Users: " + neu.length + " \n\n" + neu.join(", "));
 				} else if(neu.includes(u)) { //User ist in neu und nicht in alt
-					sendTelegramMessage(u + " has joined the server.");
+					sendTelegramMessage(u + " has joined the server.\n\nCurrently active Users: " + neu.length + " \n\n" + neu.join(", "));
 				}
 			});
 
@@ -142,6 +158,7 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 });
 
 var botUsers = [];
+fs.readFileSync("loggedInUsers.log", "utf-8").split("\n").forEach((i) => { botUsers.push(i) });
 var idToName = {};
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
