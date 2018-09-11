@@ -157,8 +157,8 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 	});
 });
 
-
-var botUsers = [-1001354373323];
+var botUsers = [];
+fs.readFileSync("loggedInUsers.log", "utf-8").split("\n").forEach((i) => { botUsers.push(i) });
 var idToName = {};
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
