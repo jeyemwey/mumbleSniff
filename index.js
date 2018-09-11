@@ -4,8 +4,7 @@ const
 	dotenv = require('dotenv').config(),
 	fs = require('fs'),
 	mumble = require('mumble'),
-	TeleBot = require('telebot'),
-	util = require('util');
+	TeleBot = require('telebot');
 
 var options = {
 	key: fs.readFileSync('key.pem'),
@@ -99,36 +98,30 @@ function nl2br (str, is_xhtml) {
     return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
 
+function objectLength(object) {
+	var length = 0;
+	for (var key in object) {
+		if (object.hasOwnProperty(key)) {
+			++length;
+		}
+	}
+	return length;
+};
+
 function getUsersFromChannel(connection, channels) {
 	var users = [];
-	for(let i = 0; i <= channels; i++) {
-		try
-		{
-			for (var u in connection._channels[i].users) {
+	for(let i = 0; i <= channels; i++) { // For every channel
+		try	{
+			for (var u in connection._channels[i].users) { // For every user in a channel
 				let username = connection._channels[i].users[u].name + "";
-				if(username==botusername)
-				{}
-				else
-				{
-					users.push(connection._channels[i].users[u].name + "");
+				if (username !== process.env.MUMBLEUSER) {
+					users.push(username);
 				}
 			}
-		}
-		catch(e)
-		{}
+		} catch(e) { /* Do nothing */ }
 	}
 	return users;
 }
-
-function ObjectLength( object ) {
-    var length = 0;
-    for( var key in object ) {
-        if( object.hasOwnProperty(key) ) {
-            ++length;
-        }
-    }
-    return length;
-};
 
 var rootCh, alt;
 
@@ -142,10 +135,11 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 	connection.authenticate(process.env.MUMBLEUSER);
 	connection.on('ready', function() {
-		alt = getUsersFromChannel(connection, ObjectLength(connection._channels));
+		rootCh = connection.rootChannel;
+		alt = getUsersFromChannel(connection, objectLength(connection._channels));
 
 		setInterval(function() {
-			var neu = getUsersFromChannel(connection, ObjectLength(connection._channels));
+			var neu = getUsersFromChannel(connection, objectLength(connection._channels));
 			var diff = arr_diff(alt, neu);
 			diff.forEach(function(u) {
 				if (alt.includes(u)) { //User ist in alt und nicht in neu
@@ -166,7 +160,6 @@ mumble.connect('mumble://' + process.env.SERVERURL, options, function(error, con
 
 var botUsers = [-1001354373323];
 var idToName = {};
-var botusername = process.env.MUMBLEUSER;
 const bot = new TeleBot(process.env.TELEGRAM_BOT_TOKEN);
 bot.connect();
 bot.on('connect', function() {console.log("TELEG: Bot is connected.")});
