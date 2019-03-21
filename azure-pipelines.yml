@@ -10,7 +10,7 @@ pool:
   vmImage: 'Ubuntu-16.04'
 
 variables:
-  imageName: 'jeyemwey/mumbleSniff:$(build.buildId)'
+  imageName: 'jeyemwey/mumblesniff:$(build.buildId)'
 
 steps:
 - script: docker build -f Dockerfile -t $(imageName) .
