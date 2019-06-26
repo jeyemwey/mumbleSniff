@@ -22,9 +22,8 @@ I ran best with loading `index.js` into an interactive shell:
 ```bash
 ~/mumbleSniff $ node
 > .load ./index.js
-```
-
-After that, you can import prior Telegram message ids with `fs.readFileSync("loggedInUsers.log", "utf-8").split("\n").forEach((i)=>{botUsers.push(i)});`. Then, check the botUsers array for new contents. (This is an [issue](https://github.com/jeyemwey/mumbleSniff/1), and _$soon_, the application should do this by itself.)
+``
+After that, you can import prior Telegram message ids with `fs.readFileSync("loggedInUsers.log", "utf-8").split("\n").forEach((i)=>{botUsers.push(i)});`. Then, check the botUsers array for new contents. (This is an [issue](https://github.com/jeyemwey/mumbleSniff/issues/1), and _$soon_, the application should do this by itself.)
 
 # Contribute
 
